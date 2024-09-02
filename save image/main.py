@@ -11,7 +11,6 @@ from google.cloud import storage
 from google.cloud import translate_v2 as translate
 from google.cloud import vision
 
-
 vision_client = vision.ImageAnnotatorClient()
 translate_client = translate.Client()
 publisher = pubsub_v1.PublisherClient()
@@ -19,8 +18,14 @@ storage_client = storage.Client()
 
 project_id = os.environ.get("GCP_PROJECT")
 
+def download_font_from_bucket(bucket_name, font_blob_name, destination_path):
+    """Downloads a font file from the specified bucket."""
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(font_blob_name)
+    blob.download_to_filename(destination_path)
+
 def add_caption_to_image(image_path, text, output_path):
-    """Adds a caption to the image."""
+    """Adds a caption to the image using a custom font."""
     image = Image.open(image_path)
     
     # Convert RGBA to RGB if necessary
@@ -29,14 +34,15 @@ def add_caption_to_image(image_path, text, output_path):
     
     draw = ImageDraw.Draw(image)
     
-    # Load a custom TTF font with a large size
-    font = ImageFont.truetype("arial.ttf", size=50)
+    # Download the custom font
+    font_path = '/tmp/arial.ttf'
+    download_font_from_bucket('custom-font-pillow', 'arial.ttf', font_path)
     
-    # Calculate text size and position using textbbox
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    # Load the custom font with a large size
+    font = ImageFont.truetype(font_path, size=50)
     
+    # Calculate text size and position
+    text_width, text_height = draw.textsize(text, font=font)
     width, height = image.size
     position = (width // 2 - text_width // 2, height - text_height - 10)
     
