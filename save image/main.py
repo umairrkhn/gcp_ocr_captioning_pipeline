@@ -41,8 +41,11 @@ def add_caption_to_image(image_path, text, output_path):
     # Load the custom font with a large size
     font = ImageFont.truetype(font_path, size=50)
     
-    # Calculate text size and position
-    text_width, text_height = draw.textsize(text, font=font)
+    # Calculate text size and position using textbbox
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    
     width, height = image.size
     position = (width // 2 - text_width // 2, height - text_height - 10)
     
