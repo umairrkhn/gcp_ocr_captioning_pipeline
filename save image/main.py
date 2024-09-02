@@ -22,6 +22,11 @@ project_id = os.environ.get("GCP_PROJECT")
 def add_caption_to_image(image_path, text, output_path):
     """Adds a caption to the image."""
     image = Image.open(image_path)
+    
+    # Convert RGBA to RGB if necessary
+    if image.mode == 'RGBA':
+        image = image.convert('RGB')
+    
     draw = ImageDraw.Draw(image)
     
     # Load a font
