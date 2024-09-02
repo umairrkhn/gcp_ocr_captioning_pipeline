@@ -38,6 +38,7 @@ def add_caption_to_image(image_path, text, output_path):
     # Save the modified image
     image.save(output_path)
 
+@functions_framework.cloud_event
 def save_result(cloud_event: CloudEvent) -> None:
     """Cloud Function triggered by PubSub when a message is received from
     a subscription.
