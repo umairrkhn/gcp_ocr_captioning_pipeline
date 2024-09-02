@@ -38,7 +38,6 @@ def add_caption_to_image(image_path, text, output_path):
     # Save the modified image
     image.save(output_path)
 
-@functions_framework.cloud_event
 def save_result(cloud_event: CloudEvent) -> None:
     """Cloud Function triggered by PubSub when a message is received from
     a subscription.
@@ -63,10 +62,10 @@ def save_result(cloud_event: CloudEvent) -> None:
 
     print(f"Received request to process file {filename}.")
 
-    # Download the original image from Cloud Storage
-    bucket_name = os.environ["RESULT_BUCKET"]
-    bucket = storage_client.get_bucket(bucket_name)
-    blob = bucket.blob(filename)
+    # Download the original image from the correct Cloud Storage bucket
+    source_bucket_name = os.environ["SOURCE_BUCKET"]
+    source_bucket = storage_client.get_bucket(source_bucket_name)
+    blob = source_bucket.blob(filename)
     downloaded_image_path = f"/tmp/{filename}"
     blob.download_to_filename(downloaded_image_path)
 
@@ -75,9 +74,10 @@ def save_result(cloud_event: CloudEvent) -> None:
     output_image_path = f"/tmp/{result_filename}"
     add_caption_to_image(downloaded_image_path, text, output_image_path)
 
-    # Upload the modified image back to Cloud Storage
-    result_blob = bucket.blob(result_filename)
+    # Upload the modified image to the result Cloud Storage bucket
+    result_bucket_name = os.environ["RESULT_BUCKET"]
+    result_bucket = storage_client.get_bucket(result_bucket_name)
+    result_blob = result_bucket.blob(result_filename)
     result_blob.upload_from_filename(output_image_path)
 
     print(f"File saved with translated text: {result_filename}")
-
