@@ -29,8 +29,8 @@ def add_caption_to_image(image_path, text, output_path):
     
     draw = ImageDraw.Draw(image)
     
-    # Load a font
-    font = ImageFont.load_default()  # You can also load a custom TTF font
+    # Load a custom TTF font with a large size
+    font = ImageFont.truetype("arial.ttf", size=50)
     
     # Calculate text size and position using textbbox
     bbox = draw.textbbox((0, 0), text, font=font)
@@ -40,8 +40,8 @@ def add_caption_to_image(image_path, text, output_path):
     width, height = image.size
     position = (width // 2 - text_width // 2, height - text_height - 10)
     
-    # Draw text on image
-    draw.text(position, text, (255, 255, 255), font=font)
+    # Draw text on image with bright red color
+    draw.text(position, text, (255, 0, 0), font=font)  # Red color (255, 0, 0)
     
     # Save the modified image
     image.save(output_path)
