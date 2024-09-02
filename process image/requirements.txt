@@ -1,0 +1,5 @@
+google-cloud-vision
+google-cloud-pubsub
+google-cloud-translate
+google-cloud-storage
+functions-framework
