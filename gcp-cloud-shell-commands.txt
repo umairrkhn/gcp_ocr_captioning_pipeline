@@ -1,0 +1,76 @@
+---MAKE SURE THESE APIs ARE ENABLED---
+
+Cloud Run functions
+
+Cloud Build
+
+Pub/Sub
+
+Artifact Registry
+
+Eventarc
+
+Cloud Run
+
+Cloud Logging
+
+Cloud Storage
+
+Cloud Translation API
+
+Cloud Vision
+
+
+
+
+---GCLOUD CLI COMMANDS---	
+
+gcloud storage buckets create gs://ocr-translate-images-nodematic --location=us-central1
+
+gcloud storage buckets create gs://ocr-translate-results-nodematic --location=us-central1
+
+gcloud pubsub topics create translate
+
+gcloud pubsub topics create result_topic
+
+
+
+
+---CLONE REPO WITH FUNCTIONS---
+
+git clone https://github.com/umairrkhn/gcp_ocr_captioning_pipeline.git
+
+*cd to separate functions to deploy
+
+
+
+
+---CLOUD RUN FUNCTION DEPLOY---
+
+gcloud functions deploy extract-text \
+--gen2 \
+--runtime=python312 \
+--region=us-central1 \
+--source=. \
+--entry-point=process_image \
+--trigger-bucket ocr-translate-images-nodematic \
+--set-env-vars "^:^GCP_PROJECT=airy-adapter-431519-f0:TRANSLATE_TOPIC=translate:RESULT_TOPIC=results:TO_LANG=en"
+
+gcloud functions deploy translate-text \
+--gen2 \
+--runtime=python312 \
+--region=us-central1 \
+--source=. \
+--entry-point=translate_text \
+--trigger-topic translate \
+--set-env-vars "GCP_PROJECT=airy-adapter-431519-f0,RESULT_TOPIC=results"
+
+gcloud functions deploy save-image \
+--gen2 \
+--runtime=python312 \
+--region=us-central1 \
+--source=. \
+--entry-point=save_result \
+--trigger-topic results \
+--set-env-vars "GCP_PROJECT=airy-adapter-431519-f0,SOURCE_BUCKET=ocr-translate-images-nodematic,RESULT_BUCKET=ocr-translate-results-nodematic"
+
